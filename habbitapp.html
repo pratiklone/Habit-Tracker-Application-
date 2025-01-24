@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker</title>
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #eef2f3, #ffffff);
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2rem;
+            color: #2c3e50;
+        }
+
+        .btn {
+            background: linear-gradient(90deg, #5b86e5, #36d1dc);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(54, 209, 220, 0.3);
+        }
+
+        input, select {
+            width: 95%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #f8f9fa;
+        }
+
+        input:focus, select:focus {
+            border-color: #5b86e5;
+            outline: none;
+            box-shadow: 0 0 5px rgba(91, 134, 229, 0.5);
+        }
+
+        .habit-list {
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .habit-item {
+            background: #f5f7fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            animation: slideIn 0.5s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .complete-btn {
+            background: #28a745;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .complete-btn:hover {
+            background: #218838;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #5b86e5;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #36d1dc;
+        }
+
+        /* Redesigned Form */
+        .form-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            text-align: left;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+        }
+
+        .summary-list {
+            text-align: left;
+        }
+
+        .summary-item {
+            background: #ffffff;
+            border: 1px solid #f1f1f1;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Home Page -->
+    <div class="page active" id="home">
+        <div class="container">
+            <h1>Welcome to Habit Tracker</h1>
+            <p>Stay consistent and achieve your goals with ease.</p>
+            <button class="btn" onclick="navigateTo('add-habit')">Get Started</button>
+        </div>
+    </div>
+
+    <!-- Add Habit Page -->
+    <div class="page" id="add-habit">
+        <div class="container">
+            <h1>Add a New Habit</h1>
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="habit-name">Habit Name</label>
+                    <input type="text" id="habit-name" placeholder="E.g., Morning Run">
+                </div>
+                <div class="form-group">
+                    <label for="habit-frequency">Frequency</label>
+                    <select id="habit-frequency">
+                        <option value="Daily">Daily</option>
+                        <option value="Weekly">Weekly</option>
+                        <option value="Monthly">Monthly</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn" onclick="addHabit()">Add Habit</button>
+            <div class="habit-list" id="habit-list"></div>
+            <button class="btn" onclick="navigateTo('summary')">Go to Summary</button>
+        </div>
+    </div>
+
+    <!-- Summary Page -->
+    <div class="page" id="summary">
+        <div class="container">
+            <h1>Habit Summary</h1>
+            <div class="summary-list" id="summary-list"></div>
+            <a href="#" class="nav-link" onclick="navigateTo('home')">Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        const habitList = [];
+        const habitListEl = document.getElementById('habit-list');
+        const summaryListEl = document.getElementById('summary-list');
+
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function addHabit() {
+            const name = document.getElementById('habit-name').value.trim();
+            const frequency = document.getElementById('habit-frequency').value;
+
+            if (!name) {
+                alert('Please enter a habit name!');
+                return;
+            }
+
+            const habit = { name, frequency, completed: false };
+            habitList.push(habit);
+
+            renderHabits();
+            renderSummary();
+            document.getElementById('habit-name').value = '';
+        }
+
+        function renderHabits() {
+            habitListEl.innerHTML = habitList
+                .map(
+                    (habit, index) =>
+                        `<div class="habit-item">
+                            <span>${habit.name} - ${habit.frequency}</span>
+                            <button class="complete-btn" onclick="markComplete(${index})">
+                                ${habit.completed ? 'Completed' : 'Mark Complete'}
+                            </button>
+                        </div>`
+                )
+                .join('');
+        }
+
+        function renderSummary() {
+            summaryListEl.innerHTML = habitList
+                .map(
+                    habit =>
+                        `<div class="summary-item">
+                            <span>${habit.name} - ${habit.frequency} - ${habit.completed ? '✔️ Completed' : '❌ Not Completed'}</span>
+                        </div>`
+                )
+                .join('');
+        }
+
+        function markComplete(index) {
+            habitList[index].completed = true;
+            renderHabits();
+            renderSummary();
+        }
+    </script>
+</body>
+</html>
